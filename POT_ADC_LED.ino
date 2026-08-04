@@ -1,16 +1,18 @@
 #define POT_PIN 34
+#define LED_PIN 2
 
 //Timer pentru citire ADC
 hw_timer_t *timer = NULL;
-//Valoare citita pe ADC
-int potValue = 0;
+//DutyCycle PWM
+volatile int duty;
 //Flag pentru afisare
 volatile bool printFlag = false;
 
 void IRAM_ATTR intTimerADC()
 {
   //Citim valoarea (0 - 4095)
-  potValue = analogRead(POT_PIN);
+  duty = analogRead(POT_PIN);
+  ledcWrite(LED_PIN, duty);
   printFlag = true;
 }
 
@@ -23,6 +25,8 @@ void setup() {
   //Setam declansarea la fiecare 10 ms
   timerAlarm(timer, 10000, true, 0);
   timerAttachInterrupt(timer, &intTimerADC);
+  //frec 5000 Hz, res 12 bits (0 - 4095)
+  ledcAttach(LED_PIN, 5000, 12);
 
 }
 
@@ -30,15 +34,8 @@ void loop() {
 
   if(printFlag)
   {
-    //Calculam tensiunea (0 - 3.3V)
-    float voltage = (potValue * 3.3) / 4095.0; 
-
-    Serial.print("Raw value ADC: ");
-    Serial.println(potValue);
-
-    Serial.print("Voltage: ");
-    Serial.print(voltage);
-    Serial.println(" V");
+    Serial.print("DutyCycle: ");
+    Serial.println(duty);
 
     printFlag = false;
   }
