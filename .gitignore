@@ -1,0 +1,6 @@
+```text
+.pio/
+.vscode/
+build/
+*.hex
+*.bin
